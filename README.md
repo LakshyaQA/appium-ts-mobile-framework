@@ -93,7 +93,9 @@ problem of inconsistent emulator window coordinates using **AutoHotkey (AHK)**.
 
 ## 🎥 Framework Execution Video
 
-<video src="assets/appiumTestRun.mp4" width="100%" controls></video>
+[**▶️ Project Execution Video**](https://github.com/LakshyaQA/appium-ts-mobile-framework/blob/master/assets/appiumTestRun.mp4)
+
+<video src="https://github.com/LakshyaQA/appium-ts-mobile-framework/raw/master/assets/appiumTestRun.mp4" width="100%" controls></video>
 
 ---
 
