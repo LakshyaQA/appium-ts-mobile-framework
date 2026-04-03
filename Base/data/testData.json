@@ -1,0 +1,129 @@
+{
+  "basePageConfig": {
+    "baseLocatorsAndroid": {
+      "continueSelectors": [
+        "~Continue",
+        "//android.widget.TextView[@text='Continue']",
+        "//*[contains(@text,'Continue')]"
+      ],
+      "nextSelectors": ["~Next", "//android.widget.TextView[@text='Next']", "//*[contains(@text,'Next')]"],
+      "clickclosebtn": ["~Close", "//android.widget.TextView[@text='Close']", "//*[contains(@text,'Close')]"]
+    },
+    "baseLocatorsIos": {
+      "continueSelectors": [
+        "//*[@name='Continue' or @label='Continue']",
+        "(//XCUIElementTypeButton[@name='Continue'])[3]",
+        "(//XCUIElementTypeOther[@name='Continue'])[last()]",
+        "(//XCUIElementTypeButton[@name='Continue'])[last()]",
+        "(//*[@name='Continue' or @label='Continue'])[last()]",
+        "//*[contains(@name,'Continue') or contains(@label,'Continue')]",
+        "(//*[contains(@name,'Continue') or contains(@label,'Continue')])[last()]",
+        "//*[contains(normalize-space(@name),'Continue') or contains(normalize-space(@label),'Continue')]",
+        "(//*[contains(normalize-space(@name),'Continue') or contains(normalize-space(@label),'Continue')])[last()]",
+        "//XCUIElementTypeButton[@name='Continue']",
+        "(//XCUIElementTypeButton[@name='Continue'])[last()]",
+        "//XCUIElementTypeButton[@label='Continue']",
+        "(//XCUIElementTypeButton[@label='Continue'])[last()]",
+        "//XCUIElementTypeOther[@name='Continue']",
+        "(//XCUIElementTypeOther[@name='Continue'])[last()]",
+        "//XCUIElementTypeOther[@label='Continue']",
+        "(//XCUIElementTypeOther[@label='Continue'])[last()]",
+        "-ios class chain:**/XCUIElementTypeButton[`name == 'Continue' && visible == 1`][-1]",
+        "-ios class chain:**/XCUIElementTypeButton[`label == 'Continue' && visible == 1`][-1]",
+        "-ios class chain:**/XCUIElementTypeOther[`name == 'Continue' && visible == 1`][-1]",
+        "-ios class chain:**/XCUIElementTypeStaticText[`name == 'Continue' && visible == 1`][-1]",
+        "-ios predicate string:(name == 'Continue' OR label == 'Continue') AND visible == 1",
+        "-ios predicate string:(name CONTAINS[c] 'Continue' OR label CONTAINS[c] 'Continue') AND visible == 1",
+        "~Continue"
+      ],
+      "nextSelectors": [
+        "(//XCUIElementTypeButton[@name='Next'])[last()]",
+        "(//XCUIElementTypeOther[@name='Next'])[last()]",
+        "(//XCUIElementTypeOther[@name='Next'])[2]",
+        "-ios class chain:**/XCUIElementTypeOther[`name == 'Next' && visible == 1`][-1]",
+        "-ios class chain:**/XCUIElementTypeOther[`name == 'Next'`][last()]",
+        "-ios predicate string:(name == 'Next' OR label == 'Next') AND visible == 1",
+        "(//*[@name='Next' or @label='Next'])[last()]",
+        "//*[@name='Next' or @label='Next']"
+      ],
+      "clickclosebtn": ["//*[@name='Close' or @label='Close']"]
+    },
+    "notificationSelectorsAndroid": [
+      "//*[contains(@text,'NOTIFICATION')]",
+      "//*[contains(@text,'Notification')]",
+      "//android.widget.TextView[@text='NOTIFICATION']"
+    ],
+    "notificationSelectorsIos": [
+      "//*[@name='NOTIFICATION' or @label='NOTIFICATION']",
+      "//*[contains(@name,'Notification') or contains(@label,'Notification')]"
+    ],
+    "nextClickRetries": 2,
+    "hideSystemKeyboarddata": {
+      "xpaths": [
+        "-ios predicate string:type == 'XCUIElementTypeButton' AND (name == 'Done' OR label == 'Done')",
+        "-ios class chain:**/XCUIElementTypeButton[`name == 'Done' OR label == 'Done'`][-1]",
+        "(//*[@name='Done' or @label='Done'])[last()]"
+      ]
+    }
+  },
+  "SwitchEnvironment": {
+    "envAndroid": {
+      "environmentOptionBtn": "//android.widget.TextView[@text='Environments']",
+      "env_opt": "//android.widget.TextView[@text='{ENV}']"
+    },
+    "envIos": {
+      "environmentOptionBtn": "//XCUIElementTypeOther[@name='Environments']",
+      "env_opt": "(//XCUIElementTypeOther[@name='{ENV}'])[last()]"
+    }
+  },
+  "Utilities": {
+    "commonutils": {
+      "CommonUtilsLocatorsAndroid": {
+        "acceptAuthorizationCheckBox": "//android.widget.ImageView",
+        "appHomeBtn": "//android.widget.TextView[@text='Home']",
+        "navigateBackToMenuBtn": "//android.widget.TextView[@text='Menu']",
+        "appSettingsBtn": "//android.widget.TextView[@text='Settings']",
+        "dateApplyBtn": "//android.widget.TextView[@text='Apply'][last()]",
+        "dateNextArrowBtn": "//android.view.ViewGroup[@resource-id='undefined.header.rightArrow']",
+        "monthYearHeader": "//*[contains(@text,'{month}') and contains(@text,'{year}')]",
+        "dateCell": "//*[@text='{day}'][last()]"
+      },
+      "CommonUtilsLocatorsIos": {
+        "acceptAuthorizationCheckBox": "//XCUIElementTypeOther[@name='Accept Authorization']",
+        "appHomeBtn": "//XCUIElementTypeOther[@name='Home']",
+        "navigateBackToMenuBtn": "(//XCUIElementTypeOther[contains(normalize-space(@name),'Menu') or @name='back-button'])[last()]",
+        "appSettingsBtn": "//XCUIElementTypeOther[@name='Settings']",
+        "dateApplyBtn": "//XCUIElementTypeOther[@name='Apply']",
+        "dateNextArrowBtn": "(//XCUIElementTypeButton[contains(normalize-space(@name),'Next') or contains(normalize-space(@label),'Next') or contains(normalize-space(@name),'right') or contains(normalize-space(@label),'right')])[last()]",
+        "datePrevArrowBtn": "(//XCUIElementTypeButton[contains(normalize-space(@name),'Previous') or contains(normalize-space(@label),'Previous') or contains(normalize-space(@name),'left') or contains(normalize-space(@label),'left')])[last()]",
+        "monthYearHeader": "//*[contains(normalize-space(@name),'{month}') and contains(normalize-space(@name),'{year}')]",
+        "dateCell": "//*[@name='{day}' or @label='{day}'][last()]"
+      }
+    },
+    "alertsHelper": {
+      "AlertsHelperIos": {
+        "buttonNames": [
+          "Allow Once",
+          "Allow While Using App",
+          "Always Allow",
+          "Allow",
+          "OK",
+          "Don’t Allow",
+          "Dismiss",
+          "Not Now",
+          "Close",
+          "Cancel"
+        ],
+        "buttonPredicateTemplate": "-ios predicate string:type == 'XCUIElementTypeButton' AND name == '{NAME}'"
+      }
+    },
+    "selectDatedata": {
+      "iosAltSelectors": [
+        "//XCUIElementTypeStaticText[contains(normalize-space(@name),'day_') and contains(normalize-space(@name),'-{day}')]",
+        "//XCUIElementTypeStaticText[contains(normalize-space(@name),'day_') and contains(normalize-space(@name),'{day}')]",
+        "//XCUIElementTypeStaticText[@name='{day}']",
+        "//XCUIElementTypeStaticText[@label='{day}']"
+      ]
+    }
+  }
+}

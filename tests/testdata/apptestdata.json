@@ -1,0 +1,18 @@
+{
+  "appPageConfig": {
+    "TestData": {
+      "sampleInput": "Testing 123"
+    },
+    "AppLocatorsAndroid": {
+      "generalStoreButton": "//android.widget.TextView[normalize-space(@text)='General Store']",
+      "select_country_dropdown": "//android.widget.Spinner[contains(@resource-id,'spinnerCountry')]",
+      "example_input": "//android.widget.EditText[@resource-id='example_input']",
+      "example_title": "//android.widget.TextView[contains(@text, 'App Test Screen')]"
+    },
+    "AppLocatorsIos": {
+      "generalStoreButton": "//XCUIElementTypeStaticText[@name='General Store']",
+      "example_input": "//XCUIElementTypeTextField[@name='example_input']",
+      "example_title": "//XCUIElementTypeStaticText[contains(@name, 'App Test Screen')]"
+    }
+  }
+}

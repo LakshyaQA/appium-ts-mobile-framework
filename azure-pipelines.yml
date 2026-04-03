@@ -1,0 +1,401 @@
+name: '$(Date:yyyy-MM-dd)'
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+      - dev
+
+parameters:
+  - name: platform
+    displayName: 'Platform to Test'
+    type: string
+    # Default to 'all' to run both Android and iOS unless specified
+    default: all
+    values:
+      - all
+      - android
+      - ios
+  - name: runMode
+    displayName: 'Run Mode'
+    type: string
+    # Default to 'none' so CI runs all specs without filters
+    default: none
+    values:
+      - tags
+      - suite
+      - none
+  - name: testTags
+    displayName: 'Test Tags to Run'
+    type: string
+    # Keep unselected by default; select when runMode=tags
+    default: 'none'
+    values:
+      - 'none'              # Unselected until you choose tags
+      - '@smoke'
+      - '@regression'
+      - '@smoke|@regression' # Runs tests with either tag
+      - 'all'               # Ignore grep, run all specs
+  - name: testSuite
+    displayName: 'Test Suite to Run'
+    type: string
+    # Keep unselected by default; select when runMode=suite
+    default: none
+    values:
+      - none                # Unselected until you choose suite
+      - smoke
+      - regression
+      - all                 # Run all suites
+  - name: bsLocal
+    displayName: 'Enable BrowserStack Local Tunnel'
+    type: string
+    default: 'true'
+    # values:
+    #   - 'false'
+    #   - 'true'
+variables:
+  NODE_VERSION: '20.x'
+  PROJECT_NAME: 'omnimobile-test-framework'
+  # Note: APP_ENV is required by the framework.
+  # Define it in the pipeline variables / variable group (allowed: DEV | ST | UAT).
+
+stages:
+  - stage: Mobile_Tests
+    displayName: 'Run Mobile Tests on BrowserStack'
+
+    jobs:
+      # ---------------- Android Tests ----------------
+      - job: android_tests
+        displayName: 'Android Tests'
+        # cancelTimeoutInMinutes: 1
+        condition: or(eq('${{ parameters.platform }}', 'all'), eq('${{ parameters.platform }}', 'android'))
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            # fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(NODE_VERSION)
+
+          - script: |
+              set -euo pipefail
+              echo "Preflight: checking for case-sensitive imports (loginpage vs LoginPage)"
+              MATCHES=$(grep -RInE "from ['\"]\.\./pages/loginpage['\"]|require\(['\"]\.\./pages/loginpage['\"]\)" tests pages Base || true)
+              if [ -n "$MATCHES" ]; then
+                echo "ERROR: Found case-sensitive import(s) referencing ../pages/loginpage. Use ../pages/LoginPage instead." >&2
+                echo "$MATCHES" >&2
+                exit 1
+              fi
+            displayName: 'Preflight: case-sensitive import check'
+
+          - script: |
+              echo "Validating runMode and selections..."
+              if [ "${{ parameters.runMode }}" = "none" ]; then
+                echo "Run Mode 'none': running all specs without tags/suite filters."
+              fi
+              if [ "${{ parameters.runMode }}" = "tags" ]; then
+                if [ "${{ parameters.testSuite }}" != "none" ]; then
+                  echo "ERROR: When Run Mode is 'tags', 'Test Suite to Run' must be 'none'."
+                  exit 1
+                fi
+                if [ "${{ parameters.testTags }}" = "none" ]; then
+                  echo "ERROR: When Run Mode is 'tags', select 'Test Tags to Run' (e.g., @smoke, @regression, @smoke|@regression, or all)."
+                  exit 1
+                fi
+              fi
+              if [ "${{ parameters.runMode }}" = "suite" ]; then
+                if [ "${{ parameters.testTags }}" != "none" ]; then
+                  echo "ERROR: When Run Mode is 'suite', 'Test Tags to Run' must be 'none'."
+                  exit 1
+                fi
+                if [ "${{ parameters.testSuite }}" = "none" ]; then
+                  echo "ERROR: When Run Mode is 'suite', select 'Test Suite to Run' (smoke, regression, or all)."
+                  exit 1
+                fi
+              fi
+            displayName: 'Validate run parameters'
+
+          - task: Cache@2
+            displayName: 'Cache npm packages'
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package.json'
+              path: '$(HOME)/.npm'
+              cacheHitVar: 'NPM_CACHE_RESTORED'
+
+          - script: npm install --no-audit --no-fund --progress=false
+            displayName: 'Install dependencies'
+            env:
+              HUSKY: '0'
+
+          - script: npm run clean:allure
+            displayName: 'Clean Allure Results'
+
+          - script: |
+              echo "runMode=${{ parameters.runMode }}"
+              echo "testSuite(param)=${{ parameters.testSuite }}"
+              echo "testTags(param)=${{ parameters.testTags }}"
+              echo "Platform=${{ parameters.platform }}"
+              echo "Resolved env:"
+              echo "SPEC_FILES=$SPEC_FILES"
+              echo "TEST_SUITE=$TEST_SUITE"
+              echo "TEST_TAGS=$TEST_TAGS"
+            displayName: 'Diagnose env resolution (Android)'
+
+          - script: |
+              set -euo pipefail
+              trap 'echo "Cancellation detected. Killing WDIO..."; kill $WDIO_PID 2>/dev/null || true; exit 130' INT TERM
+              npm run android:bs &
+              WDIO_PID=$!
+              wait $WDIO_PID
+            displayName: 'Run Android Tests'
+
+            env:
+              BROWSERSTACK_TEST_OBSERVABILITY: 'false'
+              APP_ENV: $(APP_ENV)
+              BS_LOCAL: ${{ parameters.bsLocal }}
+              BS_LOCAL_IDENTIFIER: $(Build.BuildId)
+              # Optional: allow CI to pass through Local extras and proxy settings
+              BS_FORCE_LOCAL: $(BS_FORCE_LOCAL)
+              BS_PROXY_HOST: $(BS_PROXY_HOST)
+              BS_PROXY_PORT: $(BS_PROXY_PORT)
+              BS_PROXY_USER: $(BS_PROXY_USER)
+              BS_PROXY_PASS: $(BS_PROXY_PASS)
+              # Conditionally set TEST_TAGS or TEST_SUITE based on runMode
+              ${{ if and(eq(parameters.runMode, 'tags'), or(eq(parameters.testTags, '@smoke'), eq(parameters.testTags, '@regression'), eq(parameters.testTags, '@smoke|@regression'))) }}:
+                TEST_TAGS: ${{ parameters.testTags }}
+              ${{ if eq(parameters.runMode, 'tags') }}:
+                SPEC_FILES: 'tests/**/*.spec.ts'
+              ${{ if eq(parameters.runMode, 'none') }}:
+                SPEC_FILES: 'tests/**/*.spec.ts'
+              # When running a suite, also set TEST_TAGS to filter out untagged tests
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'smoke')) }}:
+                TEST_TAGS: '@smoke'
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'regression')) }}:
+                TEST_TAGS: '@regression'
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'all')) }}:
+                TEST_TAGS: '@smoke|@regression'
+              ${{ if and(eq(parameters.runMode, 'suite'), ne(parameters.testSuite, 'all')) }}:
+                TEST_SUITE: 'testSuite/${{ parameters.testSuite }}.ts'
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'all')) }}:
+                SPEC_FILES: 'testSuite/smoke.ts,testSuite/regression.ts'
+              BROWSERSTACK_USERNAME: $(BROWSERSTACK_USERNAME)
+              BROWSERSTACK_ACCESS_KEY: $(BROWSERSTACK_ACCESS_KEY)
+              BS_ANDROID_APP_URL: $(BS_ANDROID_APP_URL)
+              LOGIN_EMAIL: $(LOGIN_EMAIL)
+              LOGIN_PASSWORD: $(LOGIN_PASSWORD)
+              PROJECT_NAME: 'appium-ts-mobile-framework'
+              BUILD_NAME: 'Android Build $(Build.BuildNumber)'
+
+          - script: |
+              PASSED=$(grep -R "\"status\":\"passed\"" allure-results/*-result.json | wc -l || true)
+              FAILED=$(grep -R "\"status\":\"failed\"" allure-results/*-result.json | wc -l || true)
+              BROKEN=$(grep -R "\"status\":\"broken\"" allure-results/*-result.json | wc -l || true)
+              SKIPPED=$(grep -R "\"status\":\"skipped\"" allure-results/*-result.json | wc -l || true)
+              FAILED_TOTAL=$((FAILED+BROKEN))
+              TOTAL=$((PASSED+FAILED_TOTAL+SKIPPED))
+              echo "Spec Summary (Android): Total=$TOTAL Passed=$PASSED Failed=$FAILED_TOTAL (failed=$FAILED, broken=$BROKEN) Skipped=$SKIPPED"
+            displayName: 'Summarize Test Results (Android)'
+            condition: succeededOrFailed()
+
+          - script: npx allure generate allure-results --clean -o allure-report
+            displayName: 'Generate Allure Report'
+            condition: succeededOrFailed()
+
+          - script: zip -r allure-report-android.zip allure-report
+            displayName: 'Zip Allure Report'
+            condition: succeededOrFailed()
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Upload Allure Report (Android)'
+            condition: succeededOrFailed()
+            inputs:
+              PathtoPublish: 'allure-report-android.zip'
+              ArtifactName: 'allure-report-android'
+              publishLocation: 'Container'
+
+          - script: echo "Android job was cancelled; WDIO process terminated."
+            displayName: 'Cancellation Notice (Android)'
+            condition: canceled()
+
+      # ---------------- iOS Tests ----------------
+      - job: ios_tests
+        displayName: 'iOS Tests'
+        # cancelTimeoutInMinutes: 1
+        condition: or(eq('${{ parameters.platform }}', 'all'), eq('${{ parameters.platform }}', 'ios'))
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: self
+            # fetchDepth: 1
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(NODE_VERSION)
+
+          - script: |
+              set -euo pipefail
+              echo "Preflight: checking for case-sensitive imports (loginpage vs LoginPage)"
+              MATCHES=$(grep -RInE "from ['\"]\.\./pages/loginpage['\"]|require\(['\"]\.\./pages/loginpage['\"]\)" tests pages Base || true)
+              if [ -n "$MATCHES" ]; then
+                echo "ERROR: Found case-sensitive import(s) referencing ../pages/loginpage. Use ../pages/LoginPage instead." >&2
+                echo "$MATCHES" >&2
+                exit 1
+              fi
+            displayName: 'Preflight: case-sensitive import check'
+
+          - script: |
+              echo "Validating runMode and selections..."
+              if [ "${{ parameters.runMode }}" = "none" ]; then
+                echo "Run Mode 'none': running all specs without tags/suite filters."
+              fi
+              if [ "${{ parameters.runMode }}" = "tags" ]; then
+                if [ "${{ parameters.testSuite }}" != "none" ]; then
+                  echo "ERROR: When Run Mode is 'tags', 'Test Suite to Run' must be 'none'."
+                  exit 1
+                fi
+                if [ "${{ parameters.testTags }}" = "none" ]; then
+                  echo "ERROR: When Run Mode is 'tags', select 'Test Tags to Run' (e.g., @smoke, @regression, @smoke|@regression, or all)."
+                  exit 1
+                fi
+              fi
+              if [ "${{ parameters.runMode }}" = "suite" ]; then
+                if [ "${{ parameters.testTags }}" != "none" ]; then
+                  echo "ERROR: When Run Mode is 'suite', 'Test Tags to Run' must be 'none'."
+                  exit 1
+                fi
+                if [ "${{ parameters.testSuite }}" = "none" ]; then
+                  echo "ERROR: When Run Mode is 'suite', select 'Test Suite to Run' (smoke, regression, or all)."
+                  exit 1
+                fi
+              fi
+            displayName: 'Validate run parameters'
+
+          - task: Cache@2
+            displayName: 'Cache npm packages'
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package.json'
+              path: '$(HOME)/.npm'
+              cacheHitVar: 'NPM_CACHE_RESTORED'
+
+          - script: npm install --no-audit --no-fund --progress=false
+            displayName: 'Install dependencies'
+            env:
+              HUSKY: '0'
+          - script: npm run clean:allure
+            displayName: 'Clean Allure Results'
+
+          - script: |
+              echo "runMode=${{ parameters.runMode }}"
+              echo "testSuite(param)=${{ parameters.testSuite }}"
+              echo "testTags(param)=${{ parameters.testTags }}"
+              echo "Platform=${{ parameters.platform }}"
+              echo "Resolved env:"
+              echo "SPEC_FILES=$SPEC_FILES"
+              echo "TEST_SUITE=$TEST_SUITE"
+              echo "TEST_TAGS=$TEST_TAGS"
+            displayName: 'Diagnose env resolution (iOS)'
+
+          - script: |
+              set -euo pipefail
+              trap 'echo "Cancellation detected. Killing WDIO..."; kill $WDIO_PID 2>/dev/null || true; exit 130' INT TERM
+              npm run ios:bs &
+              WDIO_PID=$!
+              wait $WDIO_PID
+            displayName: 'Run iOS Tests'
+
+            env:
+              BROWSERSTACK_TEST_OBSERVABILITY: 'false'
+              APP_ENV: $(APP_ENV)
+              BS_LOCAL: ${{ parameters.bsLocal }}
+              BS_LOCAL_IDENTIFIER: $(Build.BuildId)
+              # Optional: allow CI to pass through Local extras and proxy settings
+              BS_FORCE_LOCAL: $(BS_FORCE_LOCAL)
+              BS_PROXY_HOST: $(BS_PROXY_HOST)
+              BS_PROXY_PORT: $(BS_PROXY_PORT)
+              BS_PROXY_USER: $(BS_PROXY_USER)
+              BS_PROXY_PASS: $(BS_PROXY_PASS)
+              # Conditionally set TEST_TAGS or TEST_SUITE based on runMode
+              ${{ if and(eq(parameters.runMode, 'tags'), or(eq(parameters.testTags, '@smoke'), eq(parameters.testTags, '@regression'), eq(parameters.testTags, '@smoke|@regression'))) }}:
+                TEST_TAGS: ${{ parameters.testTags }}
+              ${{ if eq(parameters.runMode, 'tags') }}:
+                SPEC_FILES: 'tests/**/*.spec.ts'
+              ${{ if eq(parameters.runMode, 'none') }}:
+                SPEC_FILES: 'tests/**/*.spec.ts'
+              # When running a suite, also set TEST_TAGS to filter out untagged tests
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'smoke')) }}:
+                TEST_TAGS: '@smoke'
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'regression')) }}:
+                TEST_TAGS: '@regression'
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'all')) }}:
+                TEST_TAGS: '@smoke|@regression'
+              ${{ if and(eq(parameters.runMode, 'suite'), ne(parameters.testSuite, 'all')) }}:
+                TEST_SUITE: 'testSuite/${{ parameters.testSuite }}.ts'
+              ${{ if and(eq(parameters.runMode, 'suite'), eq(parameters.testSuite, 'all')) }}:
+                SPEC_FILES: 'testSuite/smoke.ts,testSuite/regression.ts'
+              BROWSERSTACK_USERNAME: $(BROWSERSTACK_USERNAME)
+              BROWSERSTACK_ACCESS_KEY: $(BROWSERSTACK_ACCESS_KEY)
+              BS_IOS_APP_URL: $(BS_IOS_APP_URL)
+              LOGIN_EMAIL: $(LOGIN_EMAIL)
+              LOGIN_PASSWORD: $(LOGIN_PASSWORD)
+              PROJECT_NAME: 'appium-ts-mobile-framework'
+              BUILD_NAME: 'iOS Build $(Build.BuildNumber)'
+
+          - script: |
+              PASSED=$(grep -R "\"status\":\"passed\"" allure-results/*-result.json | wc -l || true)
+              FAILED=$(grep -R "\"status\":\"failed\"" allure-results/*-result.json | wc -l || true)
+              BROKEN=$(grep -R "\"status\":\"broken\"" allure-results/*-result.json | wc -l || true)
+              SKIPPED=$(grep -R "\"status\":\"skipped\"" allure-results/*-result.json | wc -l || true)
+              FAILED_TOTAL=$((FAILED+BROKEN))
+              TOTAL=$((PASSED+FAILED_TOTAL+SKIPPED))
+              echo "Spec Summary (iOS): Total=$TOTAL Passed=$PASSED Failed=$FAILED_TOTAL (failed=$FAILED, broken=$BROKEN) Skipped=$SKIPPED"
+            displayName: 'Summarize Test Results (iOS)'
+            condition: succeededOrFailed()
+
+          - script: npx allure generate allure-results --clean -o allure-report
+            displayName: 'Generate Allure Report'
+            condition: succeededOrFailed()
+
+          - script: zip -r allure-report-ios.zip allure-report
+            displayName: 'Zip Allure Report'
+            condition: succeededOrFailed()
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Upload Allure Report (iOS)'
+            condition: succeededOrFailed()
+            inputs:
+              PathtoPublish: 'allure-report-ios.zip'
+              ArtifactName: 'allure-report-ios'
+              publishLocation: 'Container'
+
+          - script: echo "iOS job was cancelled; WDIO process terminated."
+            displayName: 'Cancellation Notice (iOS)'
+            condition: canceled()
+
+          - script: |
+              set -euo pipefail
+              echo "Zipping Allure results..."
+              rm -f allure-results.zip || true
+              zip -r allure-results.zip allure-results
+              echo "Uploading Allure results via API (iOS)..."
+              curl -sS -u "${BROWSERSTACK_USERNAME}:${BROWSERSTACK_ACCESS_KEY}" \
+                -X POST \
+                -F "data=@allure-results.zip" \
+                -F "projectName=${PROJECT_NAME}" \
+                -F "buildName=${BUILD_NAME}" \
+                -F "tags=ci,ios" \
+                -F "format=allure" \
+                https://upload-automation.browserstack.com/upload | tee bs_api_upload.out
+              # Print direct link if WDIO wrote it
+              if [ -f bs-observability-link.txt ]; then
+                LINK=$(head -n 1 bs-observability-link.txt)
+                echo "BrowserStack build report: $LINK"
+                printf "# BrowserStack\n\nBuild report: %s\n" "$LINK" > bs-summary.md
+                echo "##vso[task.uploadsummary]$(pwd)/bs-summary.md"
+              else
+                echo "Hint: open https://automation.browserstack.com/builds and filter by Project/Build name."
+              fi
+            displayName: 'Upload Allure via API (iOS)'
+            condition: succeededOrFailed()

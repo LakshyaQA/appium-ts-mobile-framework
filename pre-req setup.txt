@@ -1,0 +1,44 @@
+# 🚀 Appium TS Mobile Framework - Zero-Setup Guide
+
+This guide ensures you can get up and running with the framework in less than 5 minutes.
+
+## 🛠️ Prerequisites
+
+1.  **Node.js**: [Download & Install](https://nodejs.org/) (Version 18 or higher recommended).
+2.  **Android SDK**: Ensure `ANDROID_HOME` or `ANDROID_SDK_ROOT` is set in your environment variables.
+3.  **Java (JDK)**: Required for Appium/Android interaction.
+
+---
+
+## 🏗️ Getting Started (New Users)
+
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/LakshyaQA/appium-ts-mobile-framework.git
+    cd appium-ts-mobile-framework
+    ```
+
+2.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+    *This will automatically setup formatting (Prettier) and pre-commit hooks (Husky).*
+
+3.  **Configure Environment**:
+    Create a `.env` file in the root (refer to `.env.example` if available) with:
+    - `LOCAL_APPIUM=true`
+    - `APP_ENV=DEV` (or ST/UAT)
+    - `ANDROID_DEVICE_NAME=Test_Phone_API_36.1` (or your AVD name)
+
+4.  **Run Your First Test**:
+    ```bash
+    npm run local:android
+    ```
+
+---
+
+## ✨ Automated Features (Zero Manual Work)
+
+-   **AutoHotkey (AHK)**: The framework will detect if AHK is missing on its first run and **automatically download** a portable version to `scripts/autohotkey/`. No manual installation is required.
+-   **Window Positioning**: The emulator will automatically snap to the correct screen coordinates (handled by the framework).
+-   **Code Quality**: Lints and Formats are automatically applied before you commit code.

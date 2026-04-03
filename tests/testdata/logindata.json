@@ -1,0 +1,60 @@
+{
+  "loginPageConfig": {
+    "CredentialsDev": {
+      "email": "user_dev",
+      "password": "Money360"
+    },
+    "CredentialsST": {
+      "email": "user_st",
+      "password": "Money360"
+    },
+    "CredentialsUAT": {
+      "email": "user_uat",
+      "password": "User123@"
+    },
+    "SecurityCode": {
+      "otp": "000000"
+    },
+    "LoginLocatorsAndroid": {
+      "proceed_btn": "//android.widget.TextView[normalize-space(@text)='PROCEED']",
+      "login_txt": "//android.widget.TextView[@text='Log in']",
+      "visa_atm_txt": "//android.widget.TextView[@text='Visa ATM Locator']",
+      "letsgo_btn": "//android.widget.TextView[contains(@text, \"Let's Go!\")]",
+      "minimize_btn": "//android.widget.ImageButton[@content-desc='Minimize tab']",
+      "emailField": "//android.widget.EditText[@resource-id='username']",
+      "passwordField": "//android.widget.EditText[@resource-id='password']",
+      "loginBtn": "(//android.widget.Button)[last()]",
+      "sendcode_btn": "(//android.widget.TextView[contains(@text,'SEND CODE')])[last()]",
+      "skip_btn": "(//android.widget.TextView[contains(@text,'SKIP')])[last()]",
+      "otpField": "(//android.widget.EditText[contains(@text,'Enter 6-digit code')])[last()]",
+      "trustDevice_ckbox": "//android.widget.ImageView[last()]",
+      "resendCode_btn": "(//android.widget.TextView[normalize-space(@text)='RESEND CODE'])[last()]",
+      "confirm_btn": "(//android.widget.TextView[contains(@text,'CONFIRM')])[last()]",
+      "cancel_btn": "(//android.widget.TextView[contains(@text,'CANCEL')])[last()]",
+      "dashboard": "(//android.widget.TextView[contains(@text,'Hi')])[last()]",
+      "more_btn": "//android.view.ViewGroup[contains(@content-desc,'MORE')][last()]",
+      "logout_btn": "//android.widget.TextView[contains(@text,'Log Out')][last()]",
+      "ok_btn": "//android.view.ViewGroup[contains(@content-desc,'OK')][last()]"
+    },
+    "LoginLocatorsIos": {
+      "proceed_btn": "//XCUIElementTypeOther[normalize-space(@name)='PROCEED']",
+      "login_txt": "(//XCUIElementTypeStaticText[@name='Log in'][last()])",
+      "visa_atm_txt": "//XCUIElementTypeOther[@name='Visa ATM Locator']",
+      "letsgo_btn": "(//XCUIElementTypeOther[contains(@name,'Le')])[last()]",
+      "emailField": "//XCUIElementTypeTextField[@name='USERNAME']",
+      "passwordField": "//XCUIElementTypeSecureTextField[@name='PASSWORD']",
+      "loginBtn": "(//XCUIElementTypeButton[contains(@name,'LOGIN')])[last()]",
+      "sendcode_btn": "(//XCUIElementTypeOther[contains(@name,'SEND CODE')])[last()]",
+      "skip_btn": "(//XCUIElementTypeOther[normalize-space(@name)='SKIP'])[last()]",
+      "otpField": "//XCUIElementTypeTextField[contains(@value,'Enter 6-digit code')]",
+      "trustDevice_ckbox": "//XCUIElementTypeOther[@name='Trust this device and skip this step in the future.']/XCUIElementTypeOther[last()]",
+      "resendCode_btn": "(//XCUIElementTypeOther[contains(@name,'RESEND CODE')])[last()]",
+      "confirm_btn": "(//XCUIElementTypeOther[contains(@name,'CONFIRM')])[last()]",
+      "cancel_btn": "(//XCUIElementTypeOther[contains(@name,'CANCEL')])[last()]",
+      "dashboard": "(//XCUIElementTypeStaticText[contains(@name,'Hi')])[last()]",
+      "more_btn": "//XCUIElementTypeOther[@name='MORE'][last()]",
+      "logout_btn": "(//XCUIElementTypeOther[contains(@name,'Log Out')])[last()]",
+      "ok_btn": "(//XCUIElementTypeOther[@name='OK'])[last()]"
+    }
+  }
+}

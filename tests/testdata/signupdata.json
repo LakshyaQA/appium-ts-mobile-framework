@@ -1,0 +1,20 @@
+{
+  "SignUpPageConfig": {
+    "SignUpPageData": {
+      "FirstName": "Test",
+      "LastName": "User",
+      "PreferredName": "Tester",
+      "DOB": "01011990",
+      "Address": "123 Main St, Anytown, USA",
+      "SSN": "123-45-6789"
+    }
+  },
+  "SignUpLocatorsAndroid": {
+    "CarasouelfirstPageHeading": "//android.widget.TextView[contains(@text,'text')][last()]",
+    "CarasouelfirstPagesubheading": "//android.widget.TextView[contains(@text,'text')]"
+  },
+  "SignUpLocatorsIos": {
+    "CarasouelfirstPageHeading": "//XCUIElementTypeStaticText[contains(@name,'Bank with confidence')]",
+    "CarasouelfirstPagesubheading": "//XCUIElementTypeStaticText[contains(@name,'No monthly maintenance charges')]"
+  }
+}

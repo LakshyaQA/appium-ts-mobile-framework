@@ -1,0 +1,9 @@
+node_modules/
+allure-results/
+allure-report/
+logs/
+log/
+.git/
+.husky/
+.vscode/
+azure-pipelines.yml

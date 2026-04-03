@@ -1,0 +1,82 @@
+# ----------------------
+# Node.js & Package Logs
+# ----------------------
+node_modules/
+# package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ----------------------
+# Logs
+# ----------------------
+*.log
+logs/
+local.log
+log/
+
+# ----------------------
+# Environment Variables
+# ----------------------
+# .env
+.env.local
+
+# ----------------------
+# WebdriverIO Specific
+# ----------------------
+allure-results/
+allure-report/
+errorShots/
+reports/
+
+# ----------------------
+# TypeScript Output
+# ----------------------
+dist/
+build/
+*.tsbuildinfo
+
+# ----------------------
+# VS Code
+# ----------------------
+.vscode/
+
+# ----------------------
+# Appium Artifacts
+# ----------------------
+appium.log
+*.apk
+*.ipa
+*.exe
+
+# ----------------------
+# Test Coverage
+# ----------------------
+coverage/
+.nyc_output/
+
+# ----------------------
+# IDEs & Project Metadata
+# ----------------------
+.idea/
+*.iml
+
+# ----------------------
+# BrowserStack
+# ----------------------
+bs-local.log
+
+# ----------------------
+# Prettier (optional: if you want to ignore config)
+# ----------------------
+ .prettierrc
+ .prettierrc.js
+ .prettierignore
+ prettier.config.js
+
+# ----------------------
+# Playwright or Detox (optional for future additions)
+# ----------------------
+playwright-report/
+test-results/
+artifacts/
