@@ -28,7 +28,7 @@ from UI interactions.
 ## 🛠️ Prerequisites & Setup
 
 Ensure your local environment is ready by following the
-[**Local Prerequisites Guide**](./LOCAL_PREREQUISITES.md).
+[**Local Prerequisites Guide**](./assets/LOCAL_PREREQUISITES.md).
 
 ### Quick Start
 
@@ -82,6 +82,18 @@ problem of inconsistent emulator window coordinates using **AutoHotkey (AHK)**.
 | `npm run android:inspect` | **Inspector Mode**  | Launches app and pauses to allow inspection via Appium Inspector.     |
 | `npm run clean:allure`    | **Maintenance**     | Removes old Allure results and reports.                               |
 | `npm run allure:generate` | **Reporting**       | Generates and opens the Allure HTML report.                           |
+
+---
+
+## 📸 Appium Inspector Execution Screenshot
+
+![Test Run](assets/Inspector.png)
+
+---
+
+## 🎥 Framework Execution Video
+
+[![Watch the Framework Execution](assets/video-poster.png)](assets/appiumTestRun.mp4)
 
 ---
 

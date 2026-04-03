@@ -1,16 +1,26 @@
-# Changelog - OmniMobile Test Framework
+# Changelog - Appium TS Mobile Framework
 
 All notable changes to this project will be documented in this file. This project is currently in active
 modernization and standardization mode.
 
 ---
 
-## [2026-04-03] - Framework Modernization & Zero-Setup
+## [2026-04-03] - Framework V1.1 & Visual Documentation
 
 ### 🚀 Features & Enhancements
 
-- **Project Rebranding**: Officially renamed the framework to **OmniMobile Test Framework** across all
-  configuration files and documentation.
+- **Project Rebranding (Final)**: Officially rebranded the framework to **Appium TS Mobile Framework** across
+  all configuration files, documentation, and the `SecurityManager`.
+- **Enhanced Visual Documentation**:
+  - Added **Appium Inspector Execution Screenshot** to `README.md`.
+  - Added **Framework Execution Video** to `README.md`.
+- **Appium Inspector Optimization**:
+  - Improved session visibility by moving the inspection pause to the `before` hook (ensuring an active
+    session ID is generated).
+  - Added `appium:newCommandTimeout` (3600s) for extended inspection sessions.
+- **Reliable Startup & Cleanup**:
+  - Consolidated emulator shutdown logic into a unified `shutdownEmulator` utility.
+  - Refined `SIGINT` (Ctrl+C) handling to ensure the emulator closes even when the process is interrupted.
 - **Zero-Setup AutoHotkey (AHK)**:
   - Implemented automated detection and download of a portable AHK binary.
   - Users no longer need to install AHK manually; the framework handles it on the first run.
