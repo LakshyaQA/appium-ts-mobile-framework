@@ -93,11 +93,7 @@ problem of inconsistent emulator window coordinates using **AutoHotkey (AHK)**.
 
 ## 🎥 Framework Execution Video
 
-[**▶️ Project Execution Video**](assets/appiumTestRun.mp4)
-
-<!-- markdownlint-disable-next-line MD033 -->
-
-<video src="assets/appiumTestRun.mp4" width="100%" controls></video>
+[![Watch the Framework Execution](assets/video-poster.png)](assets/appiumTestRun.mp4)
 
 ---
 
